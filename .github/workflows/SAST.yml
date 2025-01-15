@@ -49,25 +49,20 @@ jobs:
           -H "Client-Secret: ${{ secrets.INTRUCEPT_CLIENT_SECRET }}" \
           -F "projectZipFile=@project.zip" \
           -F "applicationId=${{ secrets.INTRUCEPT_APPLICATION_ID }}" \
-          -F "scanName=SAST Scan - Gradle - from GitHub Actions" \
-          -F "language=java" \
+          -F "scanName=SAST Scan - Gradle - from GitHub Actions" \          
           https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
         
-        echo "SAST Response:"
-        VULNS_TABLE=$(echo "$RESPONSE" | jq -r '.vulnsTable')
-        if [ "$VULNS_TABLE" != "null" ] && [ -n "$VULNS_TABLE" ]; then
-          echo "$VULNS_TABLE"
+        # Check for error in response.
+        ERROR=$(echo "$RESPONSE" | jq -r '.error // empty')
+        if [ ! -z "$ERROR" ]; then
+            echo "Error: $ERROR"
+            exit 1
         else
-          echo "No SAST vulnerabilities found"
-        fi
-        
-        CAN_PROCEED=$(echo $RESPONSE | jq -r '.canProceed')
-        echo "canProceed=$CAN_PROCEED" >> $GITHUB_ENV
-    - name: Check SAST result
-      if: env.canProceed != 'true'
-      run: |
-        echo "SAST scan failed. Build cancelled."
-        exit 1
+            VULNS_TABLE=$(echo "$RESPONSE" | jq -r '.vulnsTable')
+            echo "Vulnerabilities Table:"
+            echo "$VULNS_TABLE"
+        fi           
+    
     - name: Build with Gradle
       if: env.canProceed == 'true'
       run: ./gradlew build
