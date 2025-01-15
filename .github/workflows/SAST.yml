@@ -63,7 +63,7 @@ jobs:
           -F "scanName=SAST Scan - Gradle - from GitHub Actions" \
           https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
         
-        echo "SAST Scan API Response: $RESPONSE"
+        
         
         ERROR=$(echo "$RESPONSE" | jq -r '.error // empty')
         if [ ! -z "$ERROR" ]; then
