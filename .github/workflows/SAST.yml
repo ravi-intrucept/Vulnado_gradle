@@ -63,11 +63,10 @@ jobs:
             echo "$VULNS_TABLE"
         fi           
     
-    - name: Build with Gradle
-      if: env.canProceed == 'true'
+    - name: Build with Gradle      
       run: ./gradlew build
-    - name: Upload artifact
-      if: env.canProceed == 'true'
+      
+    - name: Upload artifact      
       uses: actions/upload-artifact@v3
       with:
         name: project-files
