@@ -9,8 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    
     - name: List repository contents
       run: ls -R
+    
     - name: Check Gradle Wrapper files
       run: |
         if [ -f "gradlew" ] && [ -f "gradlew.bat" ] && [ -d "gradle/wrapper" ]; then
@@ -23,13 +25,16 @@ jobs:
           [ -d "gradle" ] && ls -la gradle || echo "gradle directory not found"
           exit 1
         fi
+    
     - name: Validate Gradle Wrapper
       uses: gradle/wrapper-validation-action@v1
+    
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
         java-version: '11'
         distribution: 'temurin'
+    
     - name: Cache Gradle packages
       uses: actions/cache@v3
       with:
@@ -37,10 +42,16 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    
     - name: Ensure gradlew is executable
       run: chmod +x gradlew
+    
     - name: Create project zip
       run: zip -r project.zip . -x "*.git*"
+    
+    - name: Install jq
+      run: sudo apt-get update && sudo apt-get install -y jq
+    
     - name: Perform SAST Scan
       id: sast
       run: |
@@ -49,25 +60,33 @@ jobs:
           -H "Client-Secret: ${{ secrets.INTRUCEPT_CLIENT_SECRET }}" \
           -F "projectZipFile=@project.zip" \
           -F "applicationId=${{ secrets.INTRUCEPT_APPLICATION_ID }}" \
-          -F "scanName=SAST Scan - Gradle - from GitHub Actions" \          
+          -F "scanName=SAST Scan - Gradle - from GitHub Actions" \
           https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
         
-        # Check for error in response..
+        echo "SAST Scan API Response: $RESPONSE"
+        
         ERROR=$(echo "$RESPONSE" | jq -r '.error // empty')
         if [ ! -z "$ERROR" ]; then
-            echo "Error: $ERROR"
-            exit 1
-        else
-            VULNS_TABLE=$(echo "$RESPONSE" | jq -r '.vulnsTable')
-            echo "Vulnerabilities Table:"
-            echo "$VULNS_TABLE"
-        fi           
+          echo "Error in SAST Scan: $ERROR"
+          exit 1
+        fi
+        
+        VULNS_TABLE=$(echo "$RESPONSE" | jq -r '.vulnsTable')
+        echo "Vulnerabilities Table:"
+        echo "$VULNS_TABLE"
     
-    - name: Build with Gradle      
+    - name: Build with Gradle
       run: ./gradlew build
-      
-    - name: Upload artifact      
+    
+    - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: project-files
         path: project.zip
+    
+    - name: Upload Gradle logs
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: gradle-logs
+        path: build/reports
