@@ -23,6 +23,10 @@ steps:
       -F "scanName=SAST Scan from Azure Pipeline" \
       -F "language=javascript" \
       https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
+
+    echo "$INTRUCEPT_CLIENT_ID"; 
+    echo "$INTRUCEPT_CLIENT_SECRET"; 
+    echo "$INTRUCEPT_APPLICATION_ID"; 
     
     # Check for error in response.
     ERROR=$(echo "$SAST_RESPONSE" | jq -r '.error // empty')
