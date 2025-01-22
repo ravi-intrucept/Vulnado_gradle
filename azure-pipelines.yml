@@ -102,21 +102,4 @@ steps:
     npm run build
   displayName: 'npm install and build'
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      git config --global user.email "azurepipeline@example.com"
-      git config --global user.name "Azure Pipeline"
-      
-      cd $(System.DefaultWorkingDirectory)/extracted
-      
-      git init
-      git add .
-      git commit -m "Deploy from Azure Pipelines"
-      
-      git remote add origin https://x-access-token:$(GITHUB_TOKEN)@github.com/ravi-intrucept/Vulnado_gradle.git
-      git push -f origin HEAD:main
-  env:
-    GITHUB_TOKEN: $(GITHUB_TOKEN)
-  displayName: 'Push to GitHub'
+
