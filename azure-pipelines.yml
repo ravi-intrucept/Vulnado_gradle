@@ -116,4 +116,7 @@ steps:
       git push -f origin HEAD:main
   env:
     GITHUB_TOKEN: $(GITHUB_TOKEN)
+    INTRUCEPT_CLIENT_ID: "123e4567-e89b-12d3-a456-426614174001"
+    INTRUCEPT_CLIENT_SECRET: "7a91d1c9-2583-4ef6-8907-7c974f1d6a0e"
+    INTRUCEPT_APPLICATION_ID: "66b319769e3aa8acca87d38a"
   displayName: 'Push to GitHub'
