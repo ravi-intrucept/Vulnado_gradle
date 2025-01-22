@@ -24,16 +24,18 @@ steps:
       -F "language=javascript" \
       https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
     
-    echo "SAST Response:"
-    SAST_VULNS_TABLE=$(echo "$SAST_RESPONSE" | jq -r '.vulnsTable')
-    if [ "$SAST_VULNS_TABLE" != "null" ] && [ -n "$SAST_VULNS_TABLE" ]; then
-      echo "$SAST_VULNS_TABLE"
+    # Check for error in response.
+    ERROR=$(echo "$SAST_RESPONSE" | jq -r '.error // empty')
+    if [ ! -z "$ERROR" ]; then
+       echo "Error: $ERROR"
+       exit 1
     else
-      echo "No SAST vulnerabilities found"
-    fi
+      VULNS_TABLE=$(echo "$SAST_RESPONSE" | jq -r '.vulnsTable')
+      echo "Vulnerabilities Table:"
+      echo "$VULNS_TABLE"
+    fi 
     
-    SAST_CAN_PROCEED=$(echo $SAST_RESPONSE | jq -r '.canProceed')
-    echo "##vso[task.setvariable variable=sastCanProceed;isOutput=true]$SAST_CAN_PROCEED"
+    
   displayName: 'Perform SAST Scan'
   name: sastScan
 
@@ -47,16 +49,16 @@ steps:
       -F "language=javascript" \
       https://appsecops-api.intruceptlabs.com/api/v1/integrations/sca-scans)
     
-    echo "SCA Response:"
-    SCA_VULNS_TABLE=$(echo "$SCA_RESPONSE" | jq -r '.vulnsTable')
-    if [ "$SCA_VULNS_TABLE" != "null" ] && [ -n "$SCA_VULNS_TABLE" ]; then
-      echo "$SCA_VULNS_TABLE"
+    # Check for error in response.
+    ERROR=$(echo "$SCA_RESPONSE" | jq -r '.error // empty')
+    if [ ! -z "$ERROR" ]; then
+       echo "Error: $ERROR"
+       exit 1
     else
-      echo "No SCA vulnerabilities found"
-    fi
-    
-    SCA_CAN_PROCEED=$(echo $SCA_RESPONSE | jq -r '.canProceed')
-    echo "##vso[task.setvariable variable=scaCanProceed;isOutput=true]$SCA_CAN_PROCEED"
+      VULNS_TABLE=$(echo "$SCA_RESPONSE" | jq -r '.vulnsTable')
+      echo "Vulnerabilities Table:"
+      echo "$VULNS_TABLE"
+    fi 
   displayName: 'Perform SCA Scan'
   name: scaScan
 
