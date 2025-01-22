@@ -4,6 +4,11 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  INTRUCEPT_CLIENT_ID: "123e4567-e89b-12d3-a456-426614174001"
+  INTRUCEPT_CLIENT_SECRET: "7a91d1c9-2583-4ef6-8907-7c974f1d6a0e"
+  INTRUCEPT_APPLICATION_ID: "66b319769e3aa8acca87d38a"
+
 steps:
 - task: ArchiveFiles@2
   inputs:
@@ -23,10 +28,6 @@ steps:
       -F "scanName=SAST Scan from Azure Pipeline" \
       -F "language=javascript" \
       https://appsecops-api.intruceptlabs.com/api/v1/integrations/sast-scans)
-
-    echo "$INTRUCEPT_CLIENT_ID"; 
-    echo "$INTRUCEPT_CLIENT_SECRET"; 
-    echo "$INTRUCEPT_APPLICATION_ID"; 
     
     # Check for error in response.
     ERROR=$(echo "$SAST_RESPONSE" | jq -r '.error // empty')
@@ -38,8 +39,6 @@ steps:
       echo "Vulnerabilities Table:"
       echo "$VULNS_TABLE"
     fi 
-    
-    
   displayName: 'Perform SAST Scan'
   name: sastScan
 
@@ -119,5 +118,5 @@ steps:
       git remote add origin https://x-access-token:$(GITHUB_TOKEN)@github.com/ravi-intrucept/Vulnado_gradle.git
       git push -f origin HEAD:main
   env:
-    GITHUB_TOKEN: $(GITHUB_TOKEN)    
+    GITHUB_TOKEN: $(GITHUB_TOKEN)
   displayName: 'Push to GitHub'
