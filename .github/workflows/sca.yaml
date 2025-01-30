@@ -72,7 +72,7 @@ jobs:
         fi
         
         VULNS_TABLE=$(echo "$RESPONSE" | jq -r '.vulnsTable')
-        echo "Vulnerabilities Table:"
+        echo "Vulnerabilities Table::"
         echo "$VULNS_TABLE"
     
     - name: Build with Gradle
